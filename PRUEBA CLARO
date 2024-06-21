@@ -1,0 +1,40 @@
+import os
+import pandas as pd
+
+carpeta_data = 'ruta/carpeta/DATA'
+
+archivos = os.listdir(carpeta_data)
+archivos_list = []
+cantidad_registros_list = []
+fecha_list = []
+
+for archivo in archivos:
+    if archivo.endswith('.txt'):
+        archivo_path = os.path.join(carpeta_data, archivo)
+        with open(archivo_path, 'r') as file:
+            lineas = file.readlines()
+            cantidad_registros = len(lineas)
+             
+        partes_nombre = archivo.split('-')
+        fecha_emision = partes_nombre[2]
+        
+        archivos_list.append(archivo)
+        cantidad_registros_list.append(cantidad_registros)
+        fecha_list.append(fecha_emision)
+
+data = {
+    'ARCHIVO': archivos_list,
+    'CANTIDAD REGISTROS': cantidad_registros_list,
+    'FECHA': fecha_list
+}
+df = pd.DataFrame(data)
+
+df_agrupado = df.groupby('FECHA').agg({
+    'ARCHIVO': 'count',
+    'CANTIDAD REGISTROS': 'sum'
+}).reset_index()
+
+excel_output = 'informe_consolidado.xlsx'
+df_agrupado.to_excel(excel_output, index=False)
+
+print(f'Se ha creado el archivo Excel "{excel_output}".')
